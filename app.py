@@ -153,30 +153,35 @@ if st.session_state.pdf_bytes:
   .w:hover {{ background: rgba(255,235,59,.5); }}
   .w.on {{ background: rgba(255,193,7,.8); outline: 2px solid #e65100; }}
 
-  /* Mobile meaning popup — shown inside viewer on small screens */
+  /* Mobile meaning box — always visible, fixed at bottom */
   #mobile-popup {{
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: white;
+    background: #ffffff;
     border-top: 3px solid #ffc107;
-    padding: 14px 18px 20px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+    padding: 10px 16px 14px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.25);
     z-index: 1000;
     font-family: sans-serif;
-    max-height: 45vh;
-    overflow-y: auto;
+    height: 110px;
+    overflow: hidden;
+  }}
+  #mobile-popup .popup-label {{
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: #999; margin-bottom: 2px;
   }}
   #mobile-popup h3 {{
-    font-size: 16px; margin-bottom: 6px; color: #1a1a1a;
+    font-size: 15px; font-weight: 700; color: #1a1a1a;
+    margin: 0 0 4px 0; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
   }}
   #mobile-popup p {{
-    font-size: 14px; line-height: 1.6; color: #444;
-  }}
-  #popup-close {{
-    position: absolute; top: 10px; right: 14px;
-    font-size: 20px; cursor: pointer; color: #888;
-    background: none; border: none; line-height: 1;
+    font-size: 13px; line-height: 1.45; color: #444;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }}
 
   @media (max-width: 600px) {{
@@ -190,10 +195,10 @@ if st.session_state.pdf_bytes:
   <div id="container"></div>
 </div>
 
-<!-- Mobile bottom sheet for meaning -->
+<!-- Mobile fixed meaning bar at bottom -->
 <div id="mobile-popup">
-  <button id="popup-close" onclick="closePopup()">✕</button>
-  <h3 id="popup-word"></h3>
+  <div class="popup-label">Word Meaning</div>
+  <h3 id="popup-word">Tap any word to see its meaning</h3>
   <p id="popup-defn"></p>
 </div>
 
@@ -206,26 +211,18 @@ window.addEventListener("resize", function() {{
   isMobile = window.innerWidth <= 768;
 }});
 
-function closePopup() {{
-  document.getElementById("mobile-popup").style.display = "none";
-}}
-
 function showMeaning(word) {{
   if (isMobile) {{
-    // On mobile: show bottom popup inside the iframe
     var popup = document.getElementById("mobile-popup");
     var wEl   = document.getElementById("popup-word");
     var dEl   = document.getElementById("popup-defn");
+    popup.style.display = "block";
     wEl.textContent = word;
     dEl.textContent = "Looking up...";
-    popup.style.display = "block";
 
     fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word))
       .then(function(r) {{ return r.json(); }})
-      .then(function(data) {{
-        var defn = getDefn(data);
-        dEl.textContent = defn;
-      }})
+      .then(function(data) {{ dEl.textContent = getDefn(data); }})
       .catch(function() {{ dEl.textContent = "Error fetching meaning."; }});
 
   }} else {{
@@ -293,6 +290,14 @@ function loadPage(wrap, idx) {{
   img.src = "data:image/png;base64," + pages[idx].img;
   wrap.appendChild(img);
   pages[idx].img = null;
+}}
+
+// Show meaning bar immediately on mobile
+if (isMobile) {{
+  var popup = document.getElementById("mobile-popup");
+  popup.style.display = "block";
+  // Add bottom padding so last page content isn't hidden behind the bar
+  viewer.style.paddingBottom = "120px";
 }}
 
 var container = document.getElementById("container");
