@@ -106,7 +106,7 @@ if st.session_state.pdf_bytes:
 
     html = f"""<!DOCTYPE html>
 <html><head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   html, body {{ height: 100%; overflow: hidden; background: #5a5a5a; }}
@@ -114,8 +114,13 @@ if st.session_state.pdf_bytes:
   #viewer {{
     height: 100vh;
     overflow-y: scroll;
+    overflow-x: hidden;
     padding: 12px 8px;
     -webkit-overflow-scrolling: touch;
+  }}
+  #container {{
+    transform-origin: top center;
+    transition: transform 0.05s linear;
   }}
 
   .page-wrap {{
@@ -296,9 +301,87 @@ function loadPage(wrap, idx) {{
 if (isMobile) {{
   var popup = document.getElementById("mobile-popup");
   popup.style.display = "block";
-  // Add bottom padding so last page content isn't hidden behind the bar
   viewer.style.paddingBottom = "120px";
 }}
+
+// ── Pinch-to-zoom on mobile ───────────────────────────────────────────────
+var scale     = 1;
+var minScale  = 1;
+var maxScale  = 4;
+var lastScale = 1;
+var container = document.getElementById("container");
+
+// Track two-finger pinch
+var initialDist = 0;
+
+function getDist(touches) {{
+  var dx = touches[0].clientX - touches[1].clientX;
+  var dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}}
+
+// Pinch origin — midpoint of two fingers, relative to container
+var originX = 0, originY = 0;
+
+viewer.addEventListener("touchstart", function(e) {{
+  if (e.touches.length === 2) {{
+    e.preventDefault();
+    initialDist = getDist(e.touches);
+    lastScale   = scale;
+
+    // Midpoint relative to viewer
+    var rect = viewer.getBoundingClientRect();
+    var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top + viewer.scrollTop;
+    originX = midX;
+    originY = midY;
+    container.style.transformOrigin = originX + "px " + originY + "px";
+  }}
+}}, {{passive: false}});
+
+viewer.addEventListener("touchmove", function(e) {{
+  if (e.touches.length === 2) {{
+    e.preventDefault();
+    var dist   = getDist(e.touches);
+    var newScale = lastScale * (dist / initialDist);
+    scale = Math.min(maxScale, Math.max(minScale, newScale));
+    container.style.transform = "scale(" + scale + ")";
+  }}
+}}, {{passive: false}});
+
+viewer.addEventListener("touchend", function(e) {{
+  if (e.touches.length < 2) {{
+    // Snap back to 1 if below min
+    if (scale < minScale) {{
+      scale = minScale;
+      container.style.transform = "scale(1)";
+    }}
+    // Re-lay overlays after zoom settles
+    setTimeout(function() {{
+      document.querySelectorAll(".page-wrap").forEach(function(wrap, idx) {{
+        if (wrap.dataset.loaded === "1") layOverlays(wrap, idx);
+      }});
+    }}, 100);
+  }}
+}});
+
+// Double-tap to reset zoom
+var lastTap = 0;
+viewer.addEventListener("touchend", function(e) {{
+  if (e.touches.length > 0) return;
+  var now = Date.now();
+  if (now - lastTap < 300) {{
+    scale = 1;
+    container.style.transform = "scale(1)";
+    container.style.transformOrigin = "top center";
+    setTimeout(function() {{
+      document.querySelectorAll(".page-wrap").forEach(function(wrap, idx) {{
+        if (wrap.dataset.loaded === "1") layOverlays(wrap, idx);
+      }});
+    }}, 100);
+  }}
+  lastTap = now;
+}});
 
 var container = document.getElementById("container");
 pages.forEach(function(p, idx) {{
