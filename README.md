@@ -60,3 +60,5 @@ This project solves that problem by providing instant word meanings inside the d
 ```bash
 git clone https://github.com/TejasAntalDoon/PDF-Vocabulary-Reader.git
 cd PDF-Vocabulary-Reader
+pip install -r requirements.txt
+streamlit run app.py
