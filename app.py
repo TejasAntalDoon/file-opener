@@ -15,7 +15,8 @@ for k, v in [("pdf_bytes", None)]:
 st.sidebar.header("📚 Word Meaning")
 st.sidebar.markdown(
     '<div id="meaning-box" style="font-family:sans-serif;font-size:14px;'
-    'line-height:1.6;color:#555;padding:4px 0">Click any word in the PDF to see its meaning here.</div>',
+    'line-height:1.6;color:#333333;padding:4px 0;background:transparent">'
+    'Click any word in the PDF to see its meaning here.</div>',
     unsafe_allow_html=True
 )
 
@@ -212,8 +213,8 @@ function showMeaning(word) {{
       .then(function(data) {{
         var defn = getDefn(data);
         box.innerHTML =
-          '<h3 style="margin-bottom:8px;font-family:sans-serif;font-size:16px;color:#1a1a1a">' + word + '</h3>' +
-          '<p style="font-family:sans-serif;font-size:14px;line-height:1.65;color:#333">' + defn + '</p>';
+          '<h3 style="margin-bottom:8px;font-family:sans-serif;font-size:16px;color:#1a1a1a;background:transparent">' + word + '</h3>' +
+          '<p style="font-family:sans-serif;font-size:14px;line-height:1.65;color:#333333;background:transparent">' + defn + '</p>';
       }})
       .catch(function() {{
         box.innerHTML = '<p style="color:red;font-family:sans-serif;font-size:13px">Error fetching meaning.</p>';
