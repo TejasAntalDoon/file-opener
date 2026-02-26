@@ -5,7 +5,7 @@ import base64
 import json
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="PDF Vocabulary Reader", layout="wide")
+st.set_page_config(page_title="PDF Vocabulary Reader", layout="wide", initial_sidebar_state="expanded")
 
 for k, v in [("pdf_bytes", None)]:
     if k not in st.session_state:
@@ -20,14 +20,40 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-# ── Global responsive CSS ─────────────────────────────────────────────────────
+# ── Force light theme + responsive CSS ───────────────────────────────────────
 st.markdown("""
 <style>
-/* Make Streamlit layout fill full height on mobile */
-html, body, [data-testid="stAppViewContainer"] {
-    height: 100%;
+/* ── Force light theme everywhere ── */
+html, body, [data-testid="stAppViewContainer"],
+[data-testid="stApp"], [data-testid="stHeader"] {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
 }
-/* Tighten sidebar on mobile */
+[data-testid="stSidebar"] {
+    background-color: #f8f8f8 !important;
+}
+[data-testid="stSidebar"] * {
+    color: #1a1a1a !important;
+}
+/* Sidebar meaning box */
+#meaning-box, #meaning-box * {
+    color: #1a1a1a !important;
+    background: transparent !important;
+}
+/* All text in app */
+p, h1, h2, h3, h4, label, span, div {
+    color: #1a1a1a !important;
+}
+/* Uploaded file name */
+[data-testid="stFileUploader"] span {
+    color: #1a1a1a !important;
+}
+/* Success box */
+[data-testid="stAlert"] {
+    background: #f0fff4 !important;
+    color: #1a1a1a !important;
+}
+/* Mobile sidebar */
 @media (max-width: 768px) {
     [data-testid="stSidebar"] {
         min-width: 0 !important;
