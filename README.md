@@ -1,12 +1,4 @@
-# 📖 PDF Vocabulary Reader
-Click any word in a PDF to instantly see its meaning.  
-Built with Streamlit + PyMuPDF.  
-
-🔗 Live App: https://file-opener-with-word-meaning-display.streamlit.app/
-
----
-
-# 📚 PDF Vocabulary Reader (AI-Based Word Meaning Finder)
+# 📚 PDF Vocabulary Reader
 
 ## 🔗 Live Demo
 👉 https://file-opener-with-word-meaning-display.streamlit.app/
